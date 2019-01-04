@@ -55,10 +55,15 @@
   <ItemGroup>
     <Compile Include="AutocadSurveyCommands.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="PLineAdjustAlign.cs" />
+    <Compile Include="PLineStretchAlign.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rea.cs" />
     <Compile Include="PLineStretchEdge.cs" />
     <Compile Include="test_gi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ToDo.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

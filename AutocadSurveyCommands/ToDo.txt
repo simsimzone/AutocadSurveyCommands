@@ -1,0 +1,4 @@
+﻿-create a command to relocate the position of the polyline start point.
+
+-create a command to force a vertice angle a specific angle (default to 90).
+

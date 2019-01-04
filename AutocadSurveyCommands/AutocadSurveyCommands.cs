@@ -18,9 +18,9 @@ namespace AutocadSurveyCommands
         static double defaultArea = 0.0;
         //static double defaultOffset = 0.0;
 
-        Document doc;
-        Database db;
-        Editor ed;
+        //Document doc;
+        //Database db;
+        //Editor ed;
 
 
         Document GetDocument()

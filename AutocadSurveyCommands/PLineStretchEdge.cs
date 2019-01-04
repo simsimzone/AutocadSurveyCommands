@@ -20,9 +20,9 @@ namespace AutocadSurveyCommands
         [CommandMethod("XXSE")]
         public void StretchPolylineEdge()
         {
-            doc = GetDocument();
-            db = doc.Database;
-            ed = doc.Editor;
+            Document doc = GetDocument();
+            Database db = doc.Database;
+            Editor ed = doc.Editor;
 
             double requiredArea = 0.0;
             try
