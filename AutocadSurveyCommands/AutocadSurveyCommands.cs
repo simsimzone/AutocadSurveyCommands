@@ -16,7 +16,7 @@ namespace AutocadSurveyCommands
     public partial class AutocadSurveyCommands
     {
         static double defaultArea = 0.0;
-        //static double defaultOffset = 0.0;
+        static double defaultOffset = 0.0;
 
         //Document doc;
         //Database db;
@@ -26,6 +26,17 @@ namespace AutocadSurveyCommands
         Document GetDocument()
         {
             return AcAp.DocumentManager.MdiActiveDocument;
+        }
+
+        /// <summary>
+        /// Gets the MDI active docutment's editor.
+        /// </summary>
+        public static Editor ActiveEditor
+        {
+            get
+            {
+                return Application.DocumentManager.MdiActiveDocument.Editor;
+            }
         }
     }
 }
