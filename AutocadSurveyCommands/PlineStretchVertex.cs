@@ -9,6 +9,9 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 
+[assembly: CommandClass(
+  typeof(AutocadSurveyCommands.AutocadSurveyCommands)
+)]
 
 namespace AutocadSurveyCommands
 {

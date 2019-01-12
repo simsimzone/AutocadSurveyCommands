@@ -9,6 +9,10 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 
+[assembly: CommandClass(
+  typeof(AutocadSurveyCommands.AutocadSurveyCommands)
+)]
+
 namespace AutocadSurveyCommands
 {
     public partial class AutocadSurveyCommands
@@ -47,8 +51,6 @@ namespace AutocadSurveyCommands
                     peo.SetRejectMessage("\n>>>this is not a polyline, Select a polyline edge: ");
                     peo.AddAllowedClass(typeof(Polyline), true);
 
-
-
                     PromptEntityResult per = ed.GetEntity(peo);
                     if (per.Status != PromptStatus.OK)
                         return;
@@ -79,7 +81,6 @@ namespace AutocadSurveyCommands
                     ed.WriteMessage("\nAng1 = " + ang1);
                     var pt1 = p1.Polar(ang1, requiredOffset).GetPoint3d();
                     var pt2 = p2.Polar(ang1, requiredOffset).GetPoint3d();
-
 
                     BlockTable blockTable = trans.GetObject(db.BlockTableId, OpenMode.ForRead)
                         as BlockTable;

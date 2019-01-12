@@ -60,6 +60,17 @@ namespace AutocadSurveyCommands
             return area;
         }
 
+
+        public static bool HasPoint(this Polyline pline, Point3d pt)
+        {
+            for (int i = 0, last = pline.NumberOfVertices; i < last; i++)
+            {
+                if (pline.GetPoint3dAt(i) == pt)
+                    return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Gets a Point2d that is far by a distance and at angle.
         /// </summary>

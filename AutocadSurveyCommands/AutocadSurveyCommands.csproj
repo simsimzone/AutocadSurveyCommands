@@ -57,6 +57,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="PLineAdjustAlign.cs" />
     <Compile Include="PlineOffsetEdge.cs" />
+    <Compile Include="PlineRelocateFirstVertex.cs" />
     <Compile Include="PLineStretchAlign.cs" />
     <Compile Include="PlineStretchOffsetEdge.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
