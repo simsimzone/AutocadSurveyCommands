@@ -71,6 +71,23 @@ namespace AutocadSurveyCommands
             return false;
         }
 
+
+        public static List<Point2d> GetPolylinePoints(this Polyline pline, int start = 0, int len = -1)
+        {
+            if (pline == null)
+                return null;
+            List<Point2d> vertices = new List<Point2d>();
+            if (len == -1 || start + len > pline.NumberOfVertices)
+            {
+                len = pline.NumberOfVertices - start;
+            }
+            for (int i = start, end = start + len; i < end; i++)
+            {
+                vertices.Add(pline.GetPoint2dAt(i));
+            }
+            return vertices;
+        }
+
         /// <summary>
         /// Gets a Point2d that is far by a distance and at angle.
         /// </summary>
