@@ -88,6 +88,40 @@ namespace AutocadSurveyCommands
             return vertices;
         }
 
+        public static Point2d GetNextPoint2d(this Polyline pline, Point2d pt)
+        {
+            var index = pline.GetParameterAtPoint(pt.GetPoint3d());
+            index = (index == pline.EndParam - 1) ? 0 : index + 1;
+            return pline.GetPointAtParameter(index).GetPoint2d();
+        }
+
+        public static Point2d GetPreviousPoint2d(this Polyline pline, Point2d pt)
+        {
+            var index = pline.GetParameterAtPoint(pt.GetPoint3d());
+            index = (index == 0) ? pline.EndParam - 1 : index - 1;
+            return pline.GetPointAtParameter(index).GetPoint2d();
+        }
+
+        public static Point2d Point2dAfter(this Polyline pline, int index)
+        {
+            index = index % pline.NumberOfVertices;
+            index = pline.Closed ?
+                (index == pline.EndParam - 1) ? 0 : index + 1
+                :
+                (index == pline.EndParam) ? 0 : index + 1;
+            return pline.GetPoint2dAt(index);
+        }
+
+        public static Point2d Point2dBefore(this Polyline pline, int index)
+        {
+            index = index % pline.NumberOfVertices;
+            index = pline.Closed ?
+                (index == 0) ? (int)pline.EndParam - 1 : index - 1
+                :
+                (index == 0) ? (int)pline.EndParam : index - 1;
+            return pline.GetPoint2dAt(index);
+        }
+
         /// <summary>
         /// Gets a Point2d that is far by a distance and at angle.
         /// </summary>
@@ -100,6 +134,16 @@ namespace AutocadSurveyCommands
             return new Point2d(
                 basePt.X + dist * Math.Cos(ang),
                 basePt.Y + dist * Math.Sin(ang));
+        }
+
+        public static Point2d Polar(this Point2d p0, Point2d p1, double dist)
+        {
+            return p1.Polar(p0.AngleTo(p1), dist);
+        }
+
+        public static double AngleTo(this Point2d p0, Point2d pt)
+        {
+            return p0.GetVectorTo(pt).Angle;
         }
 
         /// <summary>

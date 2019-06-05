@@ -61,6 +61,7 @@
     <Compile Include="PlineRelocateFirstVertex.cs" />
     <Compile Include="PLineStretchAlign.cs" />
     <Compile Include="PlineStretchOffsetEdge.cs" />
+    <Compile Include="PLineVertexRightAngle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rea.cs" />
     <Compile Include="PLineStretchEdge.cs" />
