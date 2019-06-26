@@ -17,8 +17,8 @@ namespace AutocadSurveyCommands
 {
     public partial class AutocadSurveyCommands
     {
-        [CommandMethod("XXCOORDS")]
-        public void PlineCoords()
+        [CommandMethod("XXPTABLE")]
+        public void PlineTable()
         {
             ///*
             Document doc = GetDocument();
@@ -206,6 +206,8 @@ namespace AutocadSurveyCommands
 
         }
     }
+
+
 }
 
 

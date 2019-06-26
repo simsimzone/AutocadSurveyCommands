@@ -60,7 +60,6 @@ namespace AutocadSurveyCommands
             return area;
         }
 
-
         public static bool HasPoint(this Polyline pline, Point3d pt)
         {
             for (int i = 0, last = pline.NumberOfVertices; i < last; i++)
@@ -70,7 +69,6 @@ namespace AutocadSurveyCommands
             }
             return false;
         }
-
 
         public static List<Point2d> GetPolylinePoints(this Polyline pline, int start = 0, int len = -1)
         {
@@ -104,7 +102,7 @@ namespace AutocadSurveyCommands
 
         public static Point2d Point2dAfter(this Polyline pline, int index)
         {
-            index = index % pline.NumberOfVertices;
+            index = (index + pline.NumberOfVertices) % pline.NumberOfVertices;
             index = pline.Closed ?
                 (index == pline.EndParam - 1) ? 0 : index + 1
                 :
@@ -114,7 +112,7 @@ namespace AutocadSurveyCommands
 
         public static Point2d Point2dBefore(this Polyline pline, int index)
         {
-            index = index % pline.NumberOfVertices;
+            index = (index + pline.NumberOfVertices) % pline.NumberOfVertices;
             index = pline.Closed ?
                 (index == 0) ? (int)pline.EndParam - 1 : index - 1
                 :
@@ -126,7 +124,7 @@ namespace AutocadSurveyCommands
         /// Gets a Point2d that is far by a distance and at angle.
         /// </summary>
         /// <param name="basePt"></param>
-        /// <param name="ang">The angle at which the new Point2d will be layed</param>
+        /// <param name="ang">The angle at which the result Point2d will be layed</param>
         /// <param name="dist">The distance to the new Point2d</param>
         /// <returns></returns>
         public static Point2d Polar(this Point2d basePt, double ang, double dist)
@@ -138,9 +136,15 @@ namespace AutocadSurveyCommands
 
         public static Point2d Polar(this Point2d p0, Point2d p1, double dist)
         {
-            return p1.Polar(p0.AngleTo(p1), dist);
+            return p0.Polar(p0.AngleTo(p1), dist);
         }
 
+        /// <summary>
+        /// returns the angle between X axis and the line connecting this point and pt.
+        /// </summary>
+        /// <param name="p0"></param>
+        /// <param name="pt">The point which the angle will be measured to.</param>
+        /// <returns></returns>
         public static double AngleTo(this Point2d p0, Point2d pt)
         {
             return p0.GetVectorTo(pt).Angle;

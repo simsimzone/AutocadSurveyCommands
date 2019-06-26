@@ -30,11 +30,11 @@ namespace AutocadSurveyCommands
                 {
 
                     PromptEntityOptions peo = new PromptEntityOptions(
-                        "\nSelect a closed polyline: ")
+                        "\nSelect a polyline\u299C: ")
                     {
                         AllowNone = false
                     };
-                    peo.SetRejectMessage("\n>>>Select a closed polyline: ");
+                    peo.SetRejectMessage("\n>>>Select a polyline: ");
                     peo.AddAllowedClass(typeof(Polyline), true);
                     PromptEntityResult per;
                     Polyline pline;
@@ -44,16 +44,16 @@ namespace AutocadSurveyCommands
                         if (per.Status == PromptStatus.Cancel)
                             return;
                         pline = trans.GetObject(per.ObjectId, OpenMode.ForRead) as Polyline;
-                        if (per.Status == PromptStatus.OK && pline != null && pline.Closed)
+                        if (per.Status == PromptStatus.OK && pline != null)
                             break;
                     }
 
-                    pline = trans.GetObject(per.ObjectId, OpenMode.ForRead) as Polyline;
-                    if (!pline.Closed)
-                    {
-                        ed.WriteMessage("\nThe selected polyline is not closed");
-                        return;
-                    }
+                    //pline = trans.GetObject(per.ObjectId, OpenMode.ForRead) as Polyline;
+                    //if (!pline.Closed)
+                    //{
+                    //    ed.WriteMessage("\nThe selected polyline is not closed");
+                    //    return;
+                    //}
                     var pickedPt = pline.GetClosestPointTo(per.PickedPoint, true);
                     
                     double param = pline.GetParameterAtPoint(pickedPt);
@@ -87,7 +87,7 @@ namespace AutocadSurveyCommands
                         .GetAngleTo(mPoint.GetVectorTo(m0Point));
                     double r = mf * Math.Sin(Math.PI / 2 - f0fm)
                         / Math.Sin(f0fm + m0mf - Math.PI / 2);
-                    var newPoint = m0Point.Polar(mPoint, r);
+                    var newPoint = mPoint.Polar(m0Point, -r);
                     pline.UpgradeOpen();
                     pline.SetPointAt(mIndex, newPoint);
                     trans.Commit();
@@ -95,7 +95,7 @@ namespace AutocadSurveyCommands
             }
             catch (Autodesk.AutoCAD.Runtime.Exception ex)
             {
-                ed.WriteMessage(ex.Message);
+                ed.WriteMessage(ex.Message + ex.StackTrace);
             }
         }
 

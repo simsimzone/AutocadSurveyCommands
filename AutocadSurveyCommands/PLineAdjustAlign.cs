@@ -55,7 +55,7 @@ namespace AutocadSurveyCommands
                     var baseEndParam = baseStartParam + 1;
                     var baseStartPt = baseCurve.GetPointAtParameter(baseStartParam);
                     var baseEndPt = baseCurve.GetPointAtParameter(baseEndParam);
-
+                    
                     double par = (int)pline.GetParameterAtPoint(pickPt);
                     double pre1 = par > 0 ? par - 1 : pline.EndParam - 1;
                     double pos1 = par + 1 == pline.EndParam ? 0 : par + 1;
