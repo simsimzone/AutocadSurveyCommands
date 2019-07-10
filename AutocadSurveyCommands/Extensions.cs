@@ -110,6 +110,26 @@ namespace AutocadSurveyCommands
             return pline.GetPoint2dAt(index);
         }
 
+        public static Point3d Point3dAfter(this Curve curve, int param)
+        {
+            //index = (index + pline.NumberOfVertices) % pline.NumberOfVertices;
+            param = curve.Closed ?
+                (param == curve.EndParam - 1) ? 0 : param + 1
+                :
+                (param == curve.EndParam) ? 0 : param + 1;
+            return curve.GetPointAtParameter(param);
+        }
+
+        public static int ParameterAfter(this Curve curve, int param)
+        {
+            //param = (param + pline.NumberOfVertices) % pline.NumberOfVertices;
+            param = curve.Closed ?
+                (param == curve.EndParam - 1) ? 0 : param + 1
+                :
+                (param == curve.EndParam) ? 0 : param + 1;
+            return param;
+        }
+
         public static Point2d Point2dBefore(this Polyline pline, int index)
         {
             index = (index + pline.NumberOfVertices) % pline.NumberOfVertices;

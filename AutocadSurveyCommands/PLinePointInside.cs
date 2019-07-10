@@ -29,8 +29,8 @@ namespace AutocadSurveyCommands
                 using (Transaction trans = db.TransactionManager.StartTransaction())
                 {
 
-                    (Polyline pline, _) = SelectPolyline(ed, trans,
-                        "\nSelect a polyline: ", "\n>>>Select a polyline: ", true);
+                    Polyline pline = SelectPolyline(ed, trans,
+                        "\nSelect a polyline: ", "\n>>>Select a polyline: ", true, out Point3d pickPt);
                     if (pline == null)
                         return;
                     var ptRes = GetPoint3D(ed, trans, "\nPick a point: ", "\nPick a point: ");

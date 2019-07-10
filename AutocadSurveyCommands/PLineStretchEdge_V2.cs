@@ -56,22 +56,21 @@ namespace AutocadSurveyCommands
 
                     ed.TurnForcedPickOn();
                     ed.PointMonitor += Ed_PointMonitor;
-
-                    (Polyline pline, Point3d? pickPt) = SelectPolyline(ed, trans,
-                        "\nSelect a closed polyline: ", "\n>>>Select a closed polyline: ", true);
-                    if (pline == null || !pickPt.HasValue)
+                    Polyline pline = SelectPolyline(ed, trans,
+                        "\nSelect a closed polyline: ", "\n>>>Select a closed polyline: ", true,
+                        out Point3d pickPt);
+                    if (pline == null)
                         return;
 
-                    (_, Point2d? pt2, _, Point2d? pt3, int par, int pos1) =
-                        GetStretchPoints(pline, pickPt.Value);
-                    if (!pt2.HasValue || !pt3.HasValue)
+                    var pts = GetStretchPoints(pline, pickPt, out int par);
+                    if (pts == null)
                     {
                         ed.WriteMessage("\n not enough area...");
                         return;
                     }
                     pline.UpgradeOpen();
-                    pline.SetPointAt(par, pt2.Value);
-                    pline.SetPointAt(pos1, pt3.Value);
+                    pline.SetPointAt(par, pts[1]);
+                    pline.SetPointAt(pline.ParameterAfter(par), pts[2]);
                     trans.Commit();
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception ex)
@@ -91,22 +90,23 @@ namespace AutocadSurveyCommands
 
             
 
-            (Polyline, int) CreateTransient(Transaction tr, ObjectId id, PointMonitorEventArgs e)
+            Polyline CreateTransient(Transaction tr, ObjectId id, PointMonitorEventArgs e
+                ,out int par)
             {
                 var rawPoint = e.Context.RawPoint;
                 var pline = tr.GetObject(id, OpenMode.ForRead) as Polyline;
                 var pickPt = pline.GetClosestPointTo(rawPoint, true);
-                var res = GetStretchPoints(pline, pickPt);
+                var res = GetStretchPoints(pline, pickPt, out par);
                 
                 transientColl = new DBObjectCollection();
-                if (res.Item2.HasValue)
+                if (res != null)
                 {
                     isNotEnoughArea = false;
                     Polyline drawable = new Polyline();
-                    drawable.AddVertexAt(0, res.Item1.Value, 0, 0, 0);
-                    drawable.AddVertexAt(1, res.Item2.Value, 0, 0, 0);
-                    drawable.AddVertexAt(2, res.Item4.Value, 0, 0, 0);
-                    drawable.AddVertexAt(3, res.Item3.Value, 0, 0, 0);
+                    drawable.AddVertexAt(0, res[0], 0, 0, 0);
+                    drawable.AddVertexAt(1, res[1], 0, 0, 0);
+                    drawable.AddVertexAt(2, res[2], 0, 0, 0);
+                    drawable.AddVertexAt(3, res[3], 0, 0, 0);
 
                     drawable.ColorIndex = 3;
 
@@ -122,30 +122,34 @@ namespace AutocadSurveyCommands
                     radius = glyphHeight / 2.0;
                     center = e.Context.RawPoint + new Vector3d(3 * radius, 3 * radius, 0);
 
-                    Line line1 = new Line(
-                    center + new Vector3d(-radius, -radius, 0),
-                    center + new Vector3d(+radius, +radius, 0))
+                    Point2d p1 = (center + new Vector3d(-radius, -radius, 0)).GetPoint2d();
+                    Point2d p2 = (center + new Vector3d(+radius, +radius, 0)).GetPoint2d();
+                    Point2d p3 = (center + new Vector3d(-radius, +radius, 0)).GetPoint2d();
+                    Point2d p4 = (center + new Vector3d(+radius, -radius, 0)).GetPoint2d();
+                    Polyline pl1 = new Polyline
                     {
                         ColorIndex = 1
                     };
-                    Line line2 = new Line(
-                        center + new Vector3d(-radius, +radius, 0),
-                        center + new Vector3d(+radius, -radius, 0))
+                    pl1.AddVertexAt(0, p1, 0, 0, 0);
+                    pl1.AddVertexAt(1, p2, 0, 0, 0);
+
+
+                    Polyline pl2 = new Polyline()
                     {
                         ColorIndex = 1
                     };
-                    transientColl.Add(line1);
-                    transientColl.Add(line2);
-                    //drawable.AddVertexAt(0, res.Item1.Value, 0, 0, 0);
-                    //drawable.AddVertexAt(1, res.Item3.Value, 0, 0, 0);
-                    //drawable.ColorIndex = 1;
+                    pl2.AddVertexAt(0, p3, 0, 0, 0);
+                    pl2.AddVertexAt(1, p4, 0, 0, 0);
+
+                    transientColl.Add(pl1);
+                    transientColl.Add(pl2);
                 }
 
                 for (int i = 0; i < transientColl.Count; i++)
                     GI.TransientManager.CurrentTransientManager.AddTransient(
                             transientColl[i], GI.TransientDrawingMode.Contrast,
                             128, new IntegerCollection());
-                return (pline, res.Item5);
+                return pline;
             }
 
             void UpdateTransients(Point3d lastPt, Point3d currPt)
@@ -214,7 +218,7 @@ namespace AutocadSurveyCommands
                         if (currentPolyline != pline || currentParam != par)
                         {
                             EraseTransient();
-                            (currentPolyline, currentParam) = CreateTransient(tr, id, e);
+                            currentPolyline = CreateTransient(tr, id, e, out currentParam);
                         }
                         //else if (currentPolyline == pline && currentParam == par)
                         //{
@@ -228,11 +232,11 @@ namespace AutocadSurveyCommands
                 }
             }
 
-            (Point2d?, Point2d?, Point2d?, Point2d?, int, int) GetStretchPoints(
-            Polyline pline, Point3d pickPt)
+            Point2d[] GetStretchPoints(
+            Polyline pline, Point3d pickPt, out int par)
             {
                 var area = pline.GetArea();
-                int par = (int)pline.GetParameterAtPoint(pickPt);
+                par = (int)pline.GetParameterAtPoint(pickPt);
                 int pre1 = par > 0 ? par - 1 : (int)pline.EndParam - 1;
                 int pos1 = par + 1 == (int)pline.EndParam ? 0 : par + 1;
                 int pos2 = pos1 == (int)pline.EndParam ? 1 : pos1 + 1;
@@ -252,7 +256,7 @@ namespace AutocadSurveyCommands
                 double f = 0.5 * (1.0 / Math.Tan(dAng2) - 1.0 / Math.Tan(dAng1));
                 double v = l1 * l1 + 4 * dA * f;
                 if (v < 0)
-                    return (p2, null, p3, null, par, pos1);
+                    return null;
                 double h;
                 if (Math.Abs(ang1 - ang2) < 0.00001)
                     h = dA / l1;
@@ -260,7 +264,7 @@ namespace AutocadSurveyCommands
                     h = (-l1 + Math.Sqrt(v)) / (2.0 * f);
                 var pt2 = p2.Polar(ang1, h / Math.Sin(dAng1));
                 var pt3 = p3.Polar(ang2, h / Math.Sin(dAng2));
-                return (p2, pt2, p3, pt3, par, pos1);
+                return new Point2d[] { p2, pt2, pt3, p3 };
             }
         }
     }

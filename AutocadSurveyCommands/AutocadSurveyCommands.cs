@@ -40,8 +40,8 @@ namespace AutocadSurveyCommands
             }
         }
 
-        private (Polyline, Point3d?) SelectPolyline(Editor ed, Transaction tr,
-            string message, string rejectMessage, bool closedNecessary)
+        private Polyline SelectPolyline(Editor ed, Transaction tr,
+            string message, string rejectMessage, bool closedNecessary, out Point3d pickPt)
         {
             PromptEntityOptions peo = new PromptEntityOptions(message)
             {
@@ -51,30 +51,31 @@ namespace AutocadSurveyCommands
             peo.AddAllowedClass(typeof(Polyline), true);
             PromptEntityResult per;
             Polyline pline;
-            Point3d pickedPt;
+            pickPt = Point3d.Origin;
             while (true)
             {
                 per = ed.GetEntity(peo);
                 if (per.Status == PromptStatus.Cancel)
-                    return (null, null);
+                    return null;
                 pline = tr.GetObject(per.ObjectId, OpenMode.ForRead) as Polyline;
                 if (per.Status == PromptStatus.OK
                     && pline != null
                     && closedNecessary ? pline.Closed : true)
                     break;
             }
-            pickedPt = pline.GetClosestPointTo(per.PickedPoint, true);
-            return (pline, pickedPt);
+            pickPt = pline.GetClosestPointTo(per.PickedPoint, true);
+            return pline;
         }
 
-        private Point3d?GetPoint3D(Editor ed, Transaction tr,
+        
+
+        private Point3d? GetPoint3D(Editor ed, Transaction tr,
             string message, string rejectMessage)
         {
             PromptPointOptions ppo = new PromptPointOptions(message)
             {
                 AllowNone = false
             };
-
             PromptPointResult ppr;
 
             while (true)

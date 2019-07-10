@@ -32,7 +32,6 @@ namespace AutocadSurveyCommands
 
             Point2d basePt1 = Point2d.Origin;
             Point2d basePt2 = Point2d.Origin;
-            Point2d basePickPt = Point2d.Origin;
 
             PromptEntityResult per;
 
@@ -85,9 +84,10 @@ namespace AutocadSurveyCommands
                         if (operation == Operation.ALIGN)
                         {
                             // Ask the user to select a source line segment
-                            (var p1, var p2, var pick, string kw) = PickLinePolyline(
+                            string kw = PickLinePolyline(
                                 trans, "\n Pick a source line segment or: "
-                                , new List<string>{ AREA, RIGHT});
+                                , new List<string> { AREA, RIGHT }
+                                , out Point3d? p1, out Point3d? p2);
                             // the user pressed cancel
                             if (p1 == null && kw == null)
                                 return;
@@ -98,7 +98,6 @@ namespace AutocadSurveyCommands
                             }
                             basePt1 = p1.Value.GetPoint2d();
                             basePt2 = p2.Value.GetPoint2d();
-                            basePickPt = pick.Value.GetPoint2d();
                         }
 
                         PromptEntityOptions peo = new PromptEntityOptions("\nSelect a polyline or: ")
@@ -225,9 +224,11 @@ namespace AutocadSurveyCommands
                 ed.WriteMessage(ex.Message);
             }
 
-            (Point3d?, Point3d?, Point3d?, string Keyword) PickLinePolyline
-                (Transaction tr, string message, List<string> keywords)
+            string PickLinePolyline
+                (Transaction tr, string message, List<string> keywords,
+                out Point3d? pt1, out Point3d? pt2)
             {
+                pt1 = pt2 = null;
                 PromptEntityOptions peo = new PromptEntityOptions(message)
                 {
                     AllowNone = false
@@ -247,14 +248,15 @@ namespace AutocadSurveyCommands
                 PromptEntityResult perBase;
                 Curve curve;
                 Point3d pickedPt;
+                
                 while (true)
                 {
                     perBase = ed.GetEntity(peo);
                     if (perBase.Status == PromptStatus.Cancel)
-                        return (null, null, null, null);
+                        return null;
                     if (perBase.Status == PromptStatus.Keyword)
                     {
-                        return (null, null, null, perBase.StringResult);
+                        return perBase.StringResult;
                     }
                     curve = tr.GetObject(perBase.ObjectId, OpenMode.ForRead) as Curve;
                     if (perBase.Status == PromptStatus.OK
@@ -262,11 +264,11 @@ namespace AutocadSurveyCommands
                         break;
                 }
                 pickedPt = curve.GetClosestPointTo(perBase.PickedPoint, true);
-                double par = curve.GetParameterAtPoint(pickedPt);
+                int par = (int)curve.GetParameterAtPoint(pickedPt);
 
-                Point3d p1 = curve.GetPointAtParameter((int)par);
-                Point3d p2 = curve.GetPointAtParameter((int)par + 1);
-                return (p1, p2, pickedPt, null);
+                pt1 = curve.GetPointAtParameter(par);
+                pt2 = curve.Point3dAfter(par);
+                return null;
             }
         }
 

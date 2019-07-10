@@ -28,12 +28,12 @@ namespace AutocadSurveyCommands
             {
                 using (Transaction trans = db.TransactionManager.StartTransaction())
                 {
-                    (Polyline pline, Point3d? pickPt) = SelectPolyline(ed, trans,
-                        "\nSelect a polyline: ", "\n>>>Select a polyline: ", true);
-                    if (pline == null || !pickPt.HasValue)
+                    Polyline pline = SelectPolyline(ed, trans,
+                        "\nSelect a polyline: ", "\n>>>Select a polyline: ", true, out Point3d pickPt);
+                    if (pline == null)
                         return;
                     bool closed = pline.Closed;
-                    double param = pline.GetParameterAtPoint(pickPt.Value);
+                    double param = pline.GetParameterAtPoint(pickPt);
                     int endParam = (int)pline.EndParam - (closed? 1 : 0);
 
                     int mIndex, fIndex, eIndex;
